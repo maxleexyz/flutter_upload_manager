@@ -80,6 +80,13 @@ class Uploader implements UploadDelegate {
     print("idx $idx uploaded ${chunkData.length} bytes");
     return '${new DateTime.now().millisecondsSinceEpoch}';
   }
+
+  @override
+  Future<List<int>> encrypt(List<int> rawData) async {
+    // TODO: implement encrypt
+    await Future.delayed(Duration(seconds: 1));
+    return rawData;
+  }
 }
 
 void main() {
