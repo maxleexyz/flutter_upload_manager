@@ -169,13 +169,16 @@ class UpManager {
   /// Constructor
   UpManager(this.upExecutor, this.stateStorage);
 
+  int proccessCount = 0;
+
   Future<List<int>> loadFile(filePath) async {
     final file = new File(filePath);
     return (await file.readAsBytes()).toList();
   }
 
   Future upfile(String fileKey, String filePath, int fileSize,
-      {int chunkSize: 1024 * 1024}) async {
+      {int chunkSize: 1024 * 1024, int p: 2}) async {
+    this.proccessCount = p;
     UpState state = stateStorage.loadByPath(filePath);
     if (state != null && state.successCount == state.chunks.length) {
       // if have a old state, check if need reupload
@@ -215,11 +218,14 @@ class UpManager {
     final chunkIdxList = new List<int>.generate(state.chunks.length, (i) => i);
     // wait for each chunk uploaded
 
-    //final process = [0, 1];
-    //await Future.wait(process.map((processNumber) =>
-    //   _processTask(chunkIdxList, processNumber, fileKey, state, fileData)));
-    for (var cid in chunkIdxList) {
-      await this._processUpPart(fileKey, state, cid, fileData);
+    if (this.proccessCount > 1) {
+      final process = new List<int>.generate(this.proccessCount, (i) => i);
+      await Future.wait(process.map((processNumber) =>
+          _processTask(chunkIdxList, processNumber, fileKey, state, fileData)));
+    } else {
+      for (var cid in chunkIdxList) {
+        await this._processUpPart(fileKey, state, cid, fileData);
+      }
     }
 
     await _checkResult(state, filePath);
@@ -228,7 +234,7 @@ class UpManager {
   Future _processTask(List<int> chunkIdList, int processNumber, fileKey, state,
       fileData) async {
     for (var cid in chunkIdList) {
-      if (cid % 2 == processNumber) {
+      if (cid % this.proccessCount == processNumber) {
         await _processUpPart(fileKey, state, cid, fileData);
       }
     }
