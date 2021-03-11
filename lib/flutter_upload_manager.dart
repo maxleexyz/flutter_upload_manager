@@ -163,7 +163,8 @@ class UpManager {
     return (await file.readAsBytes()).toList();
   }
 
-  Future upfile(String fileKey, String filePath, int fileSize) async {
+  Future upfile(String fileKey, String filePath, int fileSize,
+      {int chunkSize: 1024 * 1024}) async {
     UpState state = stateStorage.loadByPath(filePath);
     if (state != null && state.successCount == state.chunks.length) {
       // if have a old state, check if need reupload
@@ -171,7 +172,7 @@ class UpManager {
     } else {
       final fileData = await loadFile(filePath);
       if (state == null) {
-        state = UpState('', filePath, fileSize, 0);
+        state = UpState('', filePath, fileSize, 0, chunkSize: chunkSize);
         upExecutor.initUpload(state);
         if (state.chunks.length < 2) {
           // if single chunk
