@@ -209,7 +209,7 @@ class UpManager {
     if (state.chunks.map((st) => st.state).reduce((v1, v2) => v1 + v2) !=
         state.chunks.length) {
       // if success count not equal to total means faild
-      await stateStorage.saveState(state);
+      await stateStorage.saveState(filePath, state);
       upExecutor.onFinished(state);
     } else {
       await stateStorage.removeState(filePath);

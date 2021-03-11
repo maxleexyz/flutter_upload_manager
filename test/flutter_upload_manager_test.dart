@@ -20,7 +20,7 @@ class Storage implements StateDelegate {
   }
 
   @override
-  Future saveState(UpState state) {
+  Future saveState(String filePath, UpState state) {
     // TODO: implement saveState
     print('do save state:$state');
   }
