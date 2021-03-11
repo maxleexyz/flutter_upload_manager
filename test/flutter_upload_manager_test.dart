@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_upload_manager/flutter_upload_manager.dart';
+import 'package:http_client/console.dart' as console;
+import 'package:oss_flutter/oss_flutter.dart';
 
 class Storage implements StateDelegate {
   Storage();
@@ -27,9 +31,22 @@ class Storage implements StateDelegate {
 }
 
 class Uploader implements UploadDelegate {
+  final http = console.ConsoleClient(autoUncompress: true);
+  final client = Client.static(
+      'LTAItrC9kXkItCLK', 'bmElAFgKQNQLjKdnuI8BpG9xuQ5fvn', 'ap-northeast-1');
+
   @override
   Future<UpState> completePart(String fileKey, UpState state) async {
     // TODO: implement cpmletePart
+
+    final cplReq = client.completePartUpload(
+        'codiario', 'multi.txt', state.uploadId, state.etags);
+    final cplRequest = new console.Request(cplReq.method, cplReq.Url,
+        headers:
+            console.Headers((cplReq.headers ?? {}).cast<String, dynamic>()),
+        body: cplReq.fileData);
+    final console.Response cplResponse = await http.send(cplRequest);
+    print('${await cplResponse.readAsString()}');
     print("complete");
     return state;
   }
@@ -50,7 +67,15 @@ class Uploader implements UploadDelegate {
   @override
   Future<UpState> initPartialUpload(String fileKey, UpState state) async {
     // TODO: implement initPartialUpload
-    await Future.delayed(Duration(seconds: 1));
+    final req = client.initMultipartUpload('codiario', 'multi.txt');
+    final request = new console.Request(req.method, req.url,
+        headers: console.Headers((req.headers ?? {}).cast<String, dynamic>()),
+        body: req.fileData);
+    final console.Response response = await http.send(request);
+    final ossresp = OSSResponse(await response.readAsString());
+    ossresp.raise_exception();
+    final uploadId = ossresp.getKey('UploadId');
+    state.uploadId = uploadId;
     print("part upload inited");
     return state;
   }
@@ -78,9 +103,15 @@ class Uploader implements UploadDelegate {
   Future<String> uploadPart(
       String fileKey, UpState state, int idx, List<int> chunkData) async {
     // TODO: implement uploadPart
-    await Future.delayed(Duration(seconds: 1));
+    final upReq = client.uploadPart(
+        'codiario', 'multi.txt', state.uploadId, idx, chunkData);
+    final upRequest = new console.Request(upReq.method, upReq.Url,
+        headers: console.Headers((upReq.headers ?? {}).cast<String, dynamic>()),
+        body: upReq.fileData);
+    final console.Response upResponse = await http.send(upRequest);
+    final etag = upResponse.headers['ETag'];
     print("idx $idx uploaded ${chunkData.length} bytes");
-    return '${new DateTime.now().millisecondsSinceEpoch}';
+    return etag.first;
   }
 
   @override
@@ -120,10 +151,10 @@ void main() {
     final stateStorage = new Storage();
     final executor = new Uploader();
     final manager = new UpManager(executor, stateStorage);
+    final file = new File('/Users/alex/Documents/novel/jzj.txt');
     final state = await manager.upfile(
-        '',
-        "/Users/alex/Projects/workspace/flutter_upload_manager/flutter_upload_manager/test/test_data.txt",
-        1070);
+        'jzj.txt', "/Users/alex/Documents/novel/jzj.txt", file.lengthSync());
+    print('$state');
   });
 
   test("Broken upload", () async {

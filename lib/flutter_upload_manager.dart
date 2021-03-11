@@ -204,7 +204,7 @@ class UpManager {
     final ps = state.chunks
         .map((i) => i)
         .where((chunkState) => chunkState.state < 1)
-        .map((e) => processUpPart(fileKey, state, e.id - 1, fileData));
+        .map((e) => _processUpPart(fileKey, state, e.id - 1, fileData));
     await Future.wait(ps);
     await _checkResult(state, filePath);
   }
@@ -215,26 +215,24 @@ class UpManager {
     final chunkIdxList = new List<int>.generate(state.chunks.length, (i) => i);
     // wait for each chunk uploaded
 
-    //final process = [0, 1];
-    //await Future.wait(process.map((processNumber) =>
-    //    _processTask(chunkIdxList, processNumber, fileKey, state, fileData)));
-    for (var cid in chunkIdxList) {
-      await processUpPart(fileKey, state, cid, fileData);
-    }
+    final process = [0, 1, 2, 3, 4];
+    await Future.wait(process.map((processNumber) =>
+        _processTask(chunkIdxList, processNumber, fileKey, state, fileData)));
+    //for (var cid in chunkIdxList) {
+    //  await this._processUpPart(fileKey, state, cid, fileData);
+    //}
 
     await _checkResult(state, filePath);
   }
 
-  /*
   Future _processTask(List<int> chunkIdList, int processNumber, fileKey, state,
       fileData) async {
     for (var cid in chunkIdList) {
-      if (cid % 2 == processNumber) {
-        await processUpPart(fileKey, state, cid, fileData);
+      if (cid % 5 == processNumber) {
+        await _processUpPart(fileKey, state, cid, fileData);
       }
     }
   }
-   */
 
   Future _checkResult(UpState state, String filePath) async {
     if (state.chunks.map((st) => st.state).reduce((v1, v2) => v1 + v2) !=
@@ -248,13 +246,13 @@ class UpManager {
     }
   }
 
-  Future processUpPart(
+  Future _processUpPart(
       String fileKey, UpState state, int chunkIdx, List<int> fileData) async {
     final chunkState = state.chunks[chunkIdx];
     List<int> chunkData =
         fileData.sublist(chunkState.startIdx, chunkState.endIdx);
     final etag = await upExecutor.uploadPart(
-        fileKey, state, chunkIdx, await this.upExecutor.encrypt(chunkData));
+        fileKey, state, chunkIdx + 1, await this.upExecutor.encrypt(chunkData));
     if (etag.isNotEmpty) {
       chunkState.state = 1;
       chunkState.etag = etag;
