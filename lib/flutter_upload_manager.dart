@@ -215,12 +215,12 @@ class UpManager {
     final chunkIdxList = new List<int>.generate(state.chunks.length, (i) => i);
     // wait for each chunk uploaded
 
-    final process = [0, 1, 2, 3, 4];
-    await Future.wait(process.map((processNumber) =>
-        _processTask(chunkIdxList, processNumber, fileKey, state, fileData)));
-    //for (var cid in chunkIdxList) {
-    //  await this._processUpPart(fileKey, state, cid, fileData);
-    //}
+    //final process = [0, 1];
+    //await Future.wait(process.map((processNumber) =>
+    //   _processTask(chunkIdxList, processNumber, fileKey, state, fileData)));
+    for (var cid in chunkIdxList) {
+      await this._processUpPart(fileKey, state, cid, fileData);
+    }
 
     await _checkResult(state, filePath);
   }
@@ -228,7 +228,7 @@ class UpManager {
   Future _processTask(List<int> chunkIdList, int processNumber, fileKey, state,
       fileData) async {
     for (var cid in chunkIdList) {
-      if (cid % 5 == processNumber) {
+      if (cid % 2 == processNumber) {
         await _processUpPart(fileKey, state, cid, fileData);
       }
     }
