@@ -118,11 +118,15 @@ class UpState {
   }
 
   Map toMap() {
+    final chunks = <Map>[];
+    for (var chunkstate in this.chunks) {
+      chunks.add(chunkstate.asMap());
+    }
     return {
       UploadIdKey: this.uploadId,
       FilepathKey: this.filePath,
       FilesizeKey: this.fileSize,
-      ChunksKey: this.chunks.map((e) => e.asMap()).toList(),
+      ChunksKey: chunks,
       SuccessCountKey: this.successCount,
       UrlKey: this.url
     };
