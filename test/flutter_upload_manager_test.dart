@@ -40,7 +40,7 @@ class Uploader implements UploadDelegate {
     // TODO: implement cpmletePart
 
     final cplReq = client.completePartUpload(
-        'codiario', 'multi.txt', state.uploadId, state.etags);
+        'codiario', 'test/multi.txt', state.uploadId, state.etags);
     final cplRequest = new console.Request(cplReq.method, cplReq.Url,
         headers:
             console.Headers((cplReq.headers ?? {}).cast<String, dynamic>()),
@@ -67,7 +67,7 @@ class Uploader implements UploadDelegate {
   @override
   Future<UpState> initPartialUpload(String fileKey, UpState state) async {
     // TODO: implement initPartialUpload
-    final req = client.initMultipartUpload('codiario', 'multi.txt');
+    final req = client.initMultipartUpload('codiario', 'test/multi.txt');
     final request = new console.Request(req.method, req.url,
         headers: console.Headers((req.headers ?? {}).cast<String, dynamic>()),
         body: req.fileData);
@@ -104,7 +104,7 @@ class Uploader implements UploadDelegate {
       String fileKey, UpState state, int idx, List<int> chunkData) async {
     // TODO: implement uploadPart
     final upReq = client.uploadPart(
-        'codiario', 'multi.txt', state.uploadId, idx, chunkData);
+        'codiario', 'test/multi.txt', state.uploadId, idx, chunkData);
     final upRequest = new console.Request(upReq.method, upReq.Url,
         headers: console.Headers((upReq.headers ?? {}).cast<String, dynamic>()),
         body: upReq.fileData);
