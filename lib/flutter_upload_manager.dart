@@ -214,12 +214,18 @@ class UpManager {
     state = await upExecutor.initPartialUpload(fileKey, state);
     final chunkIdxList = new List<int>.generate(state.chunks.length, (i) => i);
     // wait for each chunk uploaded
-    final process = [0, 1];
-    await Future.wait(process.map((processNumber) =>
-        _processTask(chunkIdxList, processNumber, fileKey, state, fileData)));
+
+    //final process = [0, 1];
+    //await Future.wait(process.map((processNumber) =>
+    //    _processTask(chunkIdxList, processNumber, fileKey, state, fileData)));
+    for (var cid in chunkIdxList) {
+      await processUpPart(fileKey, state, cid, fileData);
+    }
+
     await _checkResult(state, filePath);
   }
 
+  /*
   Future _processTask(List<int> chunkIdList, int processNumber, fileKey, state,
       fileData) async {
     for (var cid in chunkIdList) {
@@ -228,6 +234,7 @@ class UpManager {
       }
     }
   }
+   */
 
   Future _checkResult(UpState state, String filePath) async {
     if (state.chunks.map((st) => st.state).reduce((v1, v2) => v1 + v2) !=
