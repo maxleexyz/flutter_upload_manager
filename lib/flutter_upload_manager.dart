@@ -218,10 +218,11 @@ class UpManager {
 
   Future _processTask(List<int> chunkIdList, int processNumber, fileKey, state,
       fileData) async {
-    chunkIdList.map((cid) async => {
-          if (cid % 3 == processNumber)
-            {await processUpPart(fileKey, state, cid, fileData)}
-        });
+    for (var cid in chunkIdList) {
+      if (cid % 3 == processNumber) {
+        await processUpPart(fileKey, state, cid, fileData);
+      }
+    }
   }
 
   Future _checkResult(UpState state, String filePath) async {
