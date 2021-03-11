@@ -63,6 +63,7 @@ class UpState {
   static const FilesizeKey = 'filesize';
   static const ChunksKey = 'chunks';
   static const SuccessCountKey = 'successCount';
+  static const UrlKey = 'url';
 
   /// unique id of
   String uploadId;
@@ -79,8 +80,12 @@ class UpState {
   /// success chunks count
   int successCount;
 
+  /// upload url
+  String url;
+
   /// Constructor for new
-  UpState(this.uploadId, this.filePath, this.fileSize, this.successCount,
+  UpState(
+      this.uploadId, this.filePath, this.fileSize, this.successCount, this.url,
       {int chunkSize: DEFAULT_CHUNK_SIZE}) {
     assert(this.fileSize <= chunkSize * 100);
     this.chunks = <ChunkState>[];
@@ -105,6 +110,7 @@ class UpState {
     this.uploadId = map[UploadIdKey];
     this.filePath = map[FilepathKey];
     this.fileSize = map[FilesizeKey];
+    this.url = map[UrlKey];
     for (final ck in map[ChunksKey]) {
       this.chunks.add(ChunkState.fromMap(ck));
     }
@@ -117,7 +123,8 @@ class UpState {
       FilepathKey: this.filePath,
       FilesizeKey: this.fileSize,
       ChunksKey: this.chunks.map((e) => e.asMap()).toList(),
-      SuccessCountKey: this.successCount
+      SuccessCountKey: this.successCount,
+      UrlKey: this.url
     };
   }
 
@@ -172,7 +179,7 @@ class UpManager {
     } else {
       final fileData = await loadFile(filePath);
       if (state == null) {
-        state = UpState('', filePath, fileSize, 0, chunkSize: chunkSize);
+        state = UpState('', filePath, fileSize, 0, '', chunkSize: chunkSize);
         upExecutor.initUpload(state);
         if (state.chunks.length < 2) {
           // if single chunk

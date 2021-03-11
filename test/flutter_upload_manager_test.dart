@@ -93,7 +93,7 @@ class Uploader implements UploadDelegate {
 
 void main() {
   test('new state', () {
-    UpState state = new UpState('', 'path', 100, 0);
+    UpState state = new UpState('', 'path', 100, 0, '');
     final list = new List<int>.generate(100, (i) => i + 1);
     var splitList = [];
     for (var i = 0; i < state.chunks.length; i++) {
@@ -129,7 +129,7 @@ void main() {
   test("Broken upload", () async {
     final filePath =
         "/Users/alex/Projects/workspace/flutter_upload_manager/flutter_upload_manager/test/test_data.txt";
-    final upState = new UpState("test_id", filePath, 1070, 3);
+    final upState = new UpState("test_id", filePath, 1070, 3, '');
     upState.chunks[0].state = 1;
     upState.chunks[1].state = 1;
     upState.chunks[2].state = 1;
