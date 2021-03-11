@@ -7,8 +7,8 @@ class UploadException extends Error {
   String errMsg() => 'Upload Faild';
 }
 
-const int DEFAULT_CHUNK_SIZE = 93;
-//const int DEFAULT_CHUNK_SIZE = 1024 * 1024 * 5;
+//const int DEFAULT_CHUNK_SIZE = 93;
+const int DEFAULT_CHUNK_SIZE = 1024 * 1024 * 5;
 
 class ChunkState {
   static const IdKey = 'Id';
@@ -80,12 +80,13 @@ class UpState {
   int successCount;
 
   /// Constructor for new
-  UpState(this.uploadId, this.filePath, this.fileSize, this.successCount) {
-    assert(this.fileSize <= DEFAULT_CHUNK_SIZE * 100);
+  UpState(this.uploadId, this.filePath, this.fileSize, this.successCount,
+      {int chunkSize: DEFAULT_CHUNK_SIZE}) {
+    assert(this.fileSize <= chunkSize * 100);
     this.chunks = <ChunkState>[];
     for (var i = 0; i < 300; i++) {
-      final startIdx = i * DEFAULT_CHUNK_SIZE;
-      var endIdx = (i + 1) * DEFAULT_CHUNK_SIZE;
+      final startIdx = i * chunkSize;
+      var endIdx = (i + 1) * chunkSize;
       if (endIdx > fileSize - 1) {
         endIdx = fileSize - 1;
       }
