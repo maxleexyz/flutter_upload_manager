@@ -98,6 +98,8 @@ class UpState {
     }
   }
 
+  get etags => this.chunks.map((chunkState) => chunkState.etag).toList();
+
   /// Constructor for instance from storage
   UpState.fromMap(Map map) {
     this.uploadId = map[UploadIdKey];
@@ -108,6 +110,17 @@ class UpState {
     }
     this.successCount = map[SuccessCountKey];
   }
+
+  Map toMap(){
+    return {
+      UploadIdKey: this.uploadId,
+      FilepathKey: this.filePath,
+      FilesizeKey: this.fileSize,
+      ChunksKey: this.chunks.map((e) => e.asMap()).toList(),
+      SuccessCountKey: this.successCount
+    }
+  }
+
   @override
   String toString() =>
       "$filePath($fileSize) chunks:${chunks.map((c) => c.toString()).join('\n')} successCount:$successCount";
@@ -115,7 +128,7 @@ class UpState {
 
 /// Delegate for implement state storage
 abstract class StateDelegate {
-  Future saveState(UpState state);
+  Future saveState(String filePath, UpState state);
   UpState loadByPath(String filePath);
   Future removeState(String filePath);
 }
@@ -127,7 +140,7 @@ abstract class UploadDelegate {
   Future<UpState> directUpload(UpState state, List<int> fileData);
   Future<UpState> initPartialUpload(UpState state);
   Future<String> uploadPart(UpState state, int idx, List<int> chunkData);
-  Future<UpState> cpmletePart(UpState state);
+  Future<UpState> completePart(UpState state);
   updatePercentage(int total, int success);
   onFinished(UpState state);
 }

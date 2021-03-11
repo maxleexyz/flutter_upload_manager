@@ -28,7 +28,7 @@ class Storage implements StateDelegate {
 
 class Uploader implements UploadDelegate {
   @override
-  Future<UpState> cpmletePart(UpState state) async {
+  Future<UpState> completePart(UpState state) async {
     // TODO: implement cpmletePart
     print("complete");
     return state;
