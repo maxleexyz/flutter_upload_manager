@@ -111,14 +111,14 @@ class UpState {
     this.successCount = map[SuccessCountKey];
   }
 
-  Map toMap(){
+  Map toMap() {
     return {
       UploadIdKey: this.uploadId,
       FilepathKey: this.filePath,
       FilesizeKey: this.fileSize,
       ChunksKey: this.chunks.map((e) => e.asMap()).toList(),
       SuccessCountKey: this.successCount
-    }
+    };
   }
 
   @override
@@ -137,10 +137,12 @@ abstract class StateDelegate {
 abstract class UploadDelegate {
   initUpload(UpState state);
   Future<List<int>> encrypt(List<int> rawData);
-  Future<UpState> directUpload(UpState state, List<int> fileData);
-  Future<UpState> initPartialUpload(UpState state);
-  Future<String> uploadPart(UpState state, int idx, List<int> chunkData);
-  Future<UpState> completePart(UpState state);
+  Future<UpState> directUpload(
+      String fileKey, UpState state, List<int> fileData);
+  Future<UpState> initPartialUpload(String fileKey, UpState state);
+  Future<String> uploadPart(
+      String fileKey, UpState state, int idx, List<int> chunkData);
+  Future<UpState> completePart(String fileKey, UpState state);
   updatePercentage(int total, int success);
   onFinished(UpState state);
 }
@@ -161,7 +163,7 @@ class UpManager {
     return (await file.readAsBytes()).toList();
   }
 
-  Future upfile(String filePath, int fileSize) async {
+  Future upfile(String fileKey, String filePath, int fileSize) async {
     UpState state = stateStorage.loadByPath(filePath);
     if (state != null && state.successCount == state.chunks.length) {
       // if have a old state, check if need reupload
@@ -173,35 +175,35 @@ class UpManager {
         upExecutor.initUpload(state);
         if (state.chunks.length < 2) {
           // if single chunk
-          await _processOneChunk(state, fileData, filePath);
+          await _processOneChunk(fileKey, state, fileData, filePath);
         } else {
-          await _processMultiChunk(state, filePath, fileData);
+          await _processMultiChunk(fileKey, state, filePath, fileData);
         }
       } else {
         // 端点续传
-        await _processBrokenState(state, fileData, filePath);
+        await _processBrokenState(fileKey, state, fileData, filePath);
       }
     }
   }
 
-  Future _processBrokenState(
-      UpState state, List<int> fileData, String filePath) async {
+  Future _processBrokenState(String fileKey, UpState state, List<int> fileData,
+      String filePath) async {
     assert(state.uploadId.isNotEmpty);
     final ps = state.chunks
         .map((i) => i)
         .where((chunkState) => chunkState.state < 1)
-        .map((e) => processUpPart(state, e.id - 1, fileData));
+        .map((e) => processUpPart(fileKey, state, e.id - 1, fileData));
     await Future.wait(ps);
     await _checkResult(state, filePath);
   }
 
-  Future _processMultiChunk(
-      UpState state, String filePath, List<int> fileData) async {
-    state = await upExecutor.initPartialUpload(state);
+  Future _processMultiChunk(String fileKey, UpState state, String filePath,
+      List<int> fileData) async {
+    state = await upExecutor.initPartialUpload(fileKey, state);
     final chunkIdxList = new List<int>.generate(state.chunks.length, (i) => i);
     // wait for each chunk uploaded
-    await Future.wait(
-        chunkIdxList.map((cid) => processUpPart(state, cid, fileData)));
+    await Future.wait(chunkIdxList
+        .map((cid) => processUpPart(fileKey, state, cid, fileData)));
     await _checkResult(state, filePath);
   }
 
@@ -217,12 +219,13 @@ class UpManager {
     }
   }
 
-  Future processUpPart(UpState state, int chunkIdx, List<int> fileData) async {
+  Future processUpPart(
+      String fileKey, UpState state, int chunkIdx, List<int> fileData) async {
     final chunkState = state.chunks[chunkIdx];
     List<int> chunkData =
         fileData.sublist(chunkState.startIdx, chunkState.endIdx);
     final etag = await upExecutor.uploadPart(
-        state, chunkIdx, await this.upExecutor.encrypt(chunkData));
+        fileKey, state, chunkIdx, await this.upExecutor.encrypt(chunkData));
     if (etag.isNotEmpty) {
       chunkState.state = 1;
       chunkState.etag = etag;
@@ -233,10 +236,10 @@ class UpManager {
     }
   }
 
-  Future _processOneChunk(
-      UpState state, List<int> fileData, String filePath) async {
+  Future _processOneChunk(String fileKey, UpState state, List<int> fileData,
+      String filePath) async {
     state = await upExecutor.directUpload(
-        state, await this.upExecutor.encrypt(fileData));
+        fileKey, state, await this.upExecutor.encrypt(fileData));
     if (state.successCount > 0) {
       await stateStorage.removeState(filePath);
       assert(state != null);

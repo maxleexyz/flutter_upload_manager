@@ -28,14 +28,15 @@ class Storage implements StateDelegate {
 
 class Uploader implements UploadDelegate {
   @override
-  Future<UpState> completePart(UpState state) async {
+  Future<UpState> completePart(String fileKey, UpState state) async {
     // TODO: implement cpmletePart
     print("complete");
     return state;
   }
 
   @override
-  Future<UpState> directUpload(UpState state, List<int> fileData) async {
+  Future<UpState> directUpload(
+      String fileKey, UpState state, List<int> fileData) async {
     // TODO: implement directUpload
     print("will upload: $state");
     print("data len:${fileData.length}");
@@ -47,7 +48,7 @@ class Uploader implements UploadDelegate {
   }
 
   @override
-  Future<UpState> initPartialUpload(UpState state) async {
+  Future<UpState> initPartialUpload(String fileKey, UpState state) async {
     // TODO: implement initPartialUpload
     await Future.delayed(Duration(seconds: 1));
     print("part upload inited");
@@ -74,7 +75,8 @@ class Uploader implements UploadDelegate {
   }
 
   @override
-  Future<String> uploadPart(UpState state, int idx, List<int> chunkData) async {
+  Future<String> uploadPart(
+      String fileKey, UpState state, int idx, List<int> chunkData) async {
     // TODO: implement uploadPart
     await Future.delayed(Duration(seconds: 1));
     print("idx $idx uploaded ${chunkData.length} bytes");
@@ -109,6 +111,7 @@ void main() {
     final executor = new Uploader();
     final manager = new UpManager(executor, stateStorage);
     final state = await manager.upfile(
+        '',
         "/Users/alex/Projects/workspace/flutter_upload_manager/flutter_upload_manager/test/test_data.txt",
         1070);
   });
@@ -118,6 +121,7 @@ void main() {
     final executor = new Uploader();
     final manager = new UpManager(executor, stateStorage);
     final state = await manager.upfile(
+        '',
         "/Users/alex/Projects/workspace/flutter_upload_manager/flutter_upload_manager/test/test_data.txt",
         1070);
   });
@@ -133,6 +137,6 @@ void main() {
     final stateStorage = Storage.fromOldState(upState);
     final executor = new Uploader();
     final manager = new UpManager(executor, stateStorage);
-    final state = await manager.upfile(filePath, 1070);
+    final state = await manager.upfile('', filePath, 1070);
   });
 }
