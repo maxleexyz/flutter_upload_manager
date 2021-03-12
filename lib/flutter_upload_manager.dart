@@ -92,11 +92,11 @@ class UpState {
     for (var i = 0; i < 600; i++) {
       final startIdx = i * chunkSize;
       var endIdx = (i + 1) * chunkSize;
-      if (endIdx > fileSize - 1) {
-        endIdx = fileSize - 1;
+      if (endIdx > fileSize) {
+        endIdx = fileSize;
       }
       this.chunks.add(new ChunkState(i + 1, startIdx, endIdx, 0));
-      if (endIdx == fileSize - 1) {
+      if (endIdx == fileSize) {
         // be sure reach the end of file, quit loop
         break;
       }

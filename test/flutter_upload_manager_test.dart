@@ -159,16 +159,22 @@ void main() {
   });
 
   test("Broken upload", () async {
-    final filePath =
-        "/Users/alex/Projects/workspace/flutter_upload_manager/flutter_upload_manager/test/test_data.txt";
-    final upState = new UpState("test_id", filePath, 1070, 3, '');
-    upState.chunks[0].state = 1;
-    upState.chunks[1].state = 1;
-    upState.chunks[2].state = 1;
-
-    final stateStorage = Storage.fromOldState(upState);
-    final executor = new Uploader();
-    final manager = new UpManager(executor, stateStorage);
-    final state = await manager.upfile('', filePath, 1070);
+    final filePath = "/Users/alex/Documents/novel/jzj.txt";
+    final file = new File(filePath);
+    final fileLength = file.lengthSync();
+    final fileContent = await file.readAsBytes();
+    expect(fileContent.length, fileLength);
+    final upState =
+        new UpState("test_id", filePath, fileLength, 3, '', chunkSize: 501001);
+    print(upState);
+    final chunks = <List<int>>[];
+    var total_length = 0;
+    for (var chunkState in upState.chunks) {
+      final slice = fileContent.sublist(chunkState.startIdx, chunkState.endIdx);
+      total_length += slice.length;
+      chunks.add(slice);
+    }
+    print('slice total=:$total_length');
+    expect(total_length, fileLength);
   });
 }

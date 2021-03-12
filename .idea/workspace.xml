@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ac078c1c-dc3f-4ce2-be16-fe7aa5d8506e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/flutter_upload_manager.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/flutter_upload_manager.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/flutter_upload_manager_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/test/flutter_upload_manager_test.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,14 +33,26 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="show.migrate.to.gradle.popup" value="false" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Flutter Test.Broken upload">
+    <configuration name="Broken upload" type="FlutterTestConfigType" factoryName="Flutter Test" temporary="true" nameIsGenerated="true">
+      <option name="testName" value="Broken upload" />
+      <option name="testFile" value="$PROJECT_DIR$/test/flutter_upload_manager_test.dart" />
+      <method v="2" />
+    </configuration>
     <configuration name="Multiple upload" type="FlutterTestConfigType" factoryName="Flutter Test" temporary="true" nameIsGenerated="true">
       <option name="testName" value="Multiple upload" />
       <option name="testFile" value="$PROJECT_DIR$/test/flutter_upload_manager_test.dart" />
       <method v="2" />
     </configuration>
+    <configuration name="new state" type="FlutterTestConfigType" factoryName="Flutter Test" temporary="true" nameIsGenerated="true">
+      <option name="testName" value="new state" />
+      <option name="testFile" value="$PROJECT_DIR$/test/flutter_upload_manager_test.dart" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Flutter Test.Broken upload" />
+        <item itemvalue="Flutter Test.new state" />
         <item itemvalue="Flutter Test.Multiple upload" />
       </list>
     </recent_temporary>
