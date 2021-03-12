@@ -87,9 +87,9 @@ class UpState {
   UpState(
       this.uploadId, this.filePath, this.fileSize, this.successCount, this.url,
       {int chunkSize: DEFAULT_CHUNK_SIZE}) {
-    assert(this.fileSize <= chunkSize * 100);
+    assert(this.fileSize <= chunkSize * 599);
     this.chunks = <ChunkState>[];
-    for (var i = 0; i < 300; i++) {
+    for (var i = 0; i < 600; i++) {
       final startIdx = i * chunkSize;
       var endIdx = (i + 1) * chunkSize;
       if (endIdx > fileSize - 1) {
