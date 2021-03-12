@@ -263,7 +263,7 @@ class UpManager {
       chunkState.state = 1;
       chunkState.etag = etag;
       state.successCount += 1;
-      upExecutor.updatePercentage(state.successCount, state.chunks.length);
+      upExecutor.updatePercentage(state.chunks.length, state.successCount);
     } else {
       throw new UploadException();
     }
