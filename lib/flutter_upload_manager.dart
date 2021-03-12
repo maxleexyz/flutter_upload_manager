@@ -227,6 +227,7 @@ class UpManager {
         await this._processUpPart(fileKey, state, cid, fileData);
       }
     }
+    state = await upExecutor.completePart(fileKey, state);
 
     await _checkResult(state, filePath);
   }

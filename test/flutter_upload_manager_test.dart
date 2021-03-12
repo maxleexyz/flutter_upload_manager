@@ -32,7 +32,8 @@ class Storage implements StateDelegate {
 
 class Uploader implements UploadDelegate {
   final http = console.ConsoleClient(autoUncompress: true);
-  final client = Client.static('', '', 'ap-northeast-1');
+  final client = Client.static(
+      'LTAItrC9kXkItCLK', 'bmElAFgKQNQLjKdnuI8BpG9xuQ5fvn', 'ap-northeast-1');
 
   @override
   Future<UpState> completePart(String fileKey, UpState state) async {
