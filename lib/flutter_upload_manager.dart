@@ -2,6 +2,7 @@ library flutter_upload_manager;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 class UploadException extends Error {
   String errMsg() => 'Upload Faild';
@@ -175,27 +176,26 @@ class UpManager {
     return (await file.readAsBytes()).toList();
   }
 
-  Future upfile(String fileKey, String filePath, int fileSize,
+  Future upfile(String fileKey, Uint8List fileData, int fileSize,
       {int chunkSize: 1024 * 1024, int p: 2}) async {
     this.proccessCount = p;
-    UpState state = stateStorage.loadByPath(filePath);
+    UpState state = stateStorage.loadByPath(fileKey);
     if (state != null && state.successCount == state.chunks.length) {
       // if have a old state, check if need reupload
       await _processOldState(state);
     } else {
-      final fileData = await loadFile(filePath);
       if (state == null) {
-        state = UpState('', filePath, fileSize, 0, '', chunkSize: chunkSize);
+        state = UpState('', fileKey, fileSize, 0, '', chunkSize: chunkSize);
         upExecutor.initUpload(state);
         if (state.chunks.length < 2) {
           // if single chunk
-          await _processOneChunk(fileKey, state, fileData, filePath);
+          await _processOneChunk(fileKey, state, fileData, fileKey);
         } else {
-          await _processMultiChunk(fileKey, state, filePath, fileData);
+          await _processMultiChunk(fileKey, state, fileKey, fileData);
         }
       } else {
         // 端点续传
-        await _processBrokenState(fileKey, state, fileData, filePath);
+        await _processBrokenState(fileKey, state, fileData, fileKey);
       }
     }
   }
