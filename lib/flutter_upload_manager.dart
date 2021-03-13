@@ -147,7 +147,6 @@ abstract class StateDelegate {
 /// Delegate for implement upload
 abstract class UploadDelegate {
   initUpload(UpState state);
-  Future<List<int>> encrypt(List<int> rawData);
   Future<UpState> directUpload(
       String fileKey, UpState state, List<int> fileData);
   Future<UpState> initPartialUpload(String fileKey, UpState state);
@@ -258,8 +257,8 @@ class UpManager {
     final chunkState = state.chunks[chunkIdx];
     List<int> chunkData =
         fileData.sublist(chunkState.startIdx, chunkState.endIdx);
-    final etag = await upExecutor.uploadPart(
-        fileKey, state, chunkIdx + 1, await this.upExecutor.encrypt(chunkData));
+    final etag =
+        await upExecutor.uploadPart(fileKey, state, chunkIdx + 1, chunkData);
     if (etag.isNotEmpty) {
       chunkState.state = 1;
       chunkState.etag = etag;
@@ -272,8 +271,7 @@ class UpManager {
 
   Future _processOneChunk(String fileKey, UpState state, List<int> fileData,
       String filePath) async {
-    state = await upExecutor.directUpload(
-        fileKey, state, await this.upExecutor.encrypt(fileData));
+    state = await upExecutor.directUpload(fileKey, state, fileData);
     if (state.successCount > 0) {
       await stateStorage.removeState(filePath);
       assert(state != null);

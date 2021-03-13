@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -124,19 +125,24 @@ class Uploader implements UploadDelegate {
 }
 
 void main() {
-  test('new state', () {
-    UpState state = new UpState('', 'path', 100, 0, '');
-    final list = new List<int>.generate(100, (i) => i + 1);
+  test('new state', () async {
+    final file = new File(
+        '/Users/alex/Projects/workspace/flutter_upload_manager/test/test.txt');
+    UpState state =
+        new UpState('', file.path, file.lengthSync(), 0, '', chunkSize: 7);
     var splitList = [];
+    final fileContent = await file.readAsBytes();
     for (var i = 0; i < state.chunks.length; i++) {
       final chunkstate = state.chunks[i];
-      splitList.add(list.sublist(chunkstate.startIdx, chunkstate.endIdx));
+      splitList
+          .add(fileContent.sublist(chunkstate.startIdx, chunkstate.endIdx));
     }
-    for (var j = 0; j < splitList.length - 1; j++) {
-      final r1 = splitList[j];
-      final r2 = splitList[j + 1];
-      expect(r1.last + 1, r2.first);
+    var temp_list = <int>[];
+    for (var l in splitList) {
+      temp_list = temp_list + l;
     }
+    print('${utf8.decode(temp_list)}');
+    expect(fileContent, temp_list);
   });
   test("single upload", () async {
     final stateStorage = new Storage();
