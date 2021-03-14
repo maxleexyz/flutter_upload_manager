@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_upload_manager/flutter_upload_manager.dart';
@@ -33,8 +34,7 @@ class Storage implements StateDelegate {
 
 class Uploader implements UploadDelegate {
   final http = console.ConsoleClient(autoUncompress: true);
-  final client = Client.static(
-      'LTAItrC9kXkItCLK', 'bmElAFgKQNQLjKdnuI8BpG9xuQ5fvn', 'ap-northeast-1');
+  final client = Client.static('', '', 'ap-northeast-1');
 
   @override
   Future<UpState> completePart(String fileKey, UpState state) async {
@@ -58,7 +58,14 @@ class Uploader implements UploadDelegate {
     // TODO: implement directUpload
     print("will upload: $state");
     print("data len:${fileData.length}");
-    await Future.delayed(Duration(seconds: 1));
+
+    final req = client.putObject(fileData, 'codiario', fileKey);
+    final request = new console.Request(req.method, req.url,
+        headers: console.Headers((req.headers ?? {}).cast<String, dynamic>()),
+        body: req.fileData);
+    final console.Response response = await http.send(request);
+    print("response status:${response.statusCode}");
+
     print('uploaded');
     state.chunks[0].state = 1;
     state.successCount += 1;
@@ -149,9 +156,8 @@ void main() {
     final executor = new Uploader();
     final manager = new UpManager(executor, stateStorage);
     final state = await manager.upfile(
-        '',
-        "/Users/alex/Projects/workspace/flutter_upload_manager/flutter_upload_manager/test/test_data.txt",
-        1070);
+        'small_file.txt', Uint8List.fromList([80, 81, 82, 83, 84]), 1070);
+    print('state:$state');
   });
 
   test("Multiple upload", () async {
@@ -160,7 +166,7 @@ void main() {
     final manager = new UpManager(executor, stateStorage);
     final file = new File('/Users/alex/Documents/novel/jzj.txt');
     final state = await manager.upfile('test/sjzj.txt',
-        "/Users/alex/Documents/novel/jzj.txt", file.lengthSync());
+        Uint8List.fromList([80, 81, 82, 83, 84]), file.lengthSync());
     print('$state');
   });
 

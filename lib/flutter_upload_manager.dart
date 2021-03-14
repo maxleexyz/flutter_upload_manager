@@ -183,6 +183,7 @@ class UpManager {
     if (state != null && state.successCount == state.chunks.length) {
       // if have a old state, check if need reupload
       await _processOldState(state);
+      upExecutor.onFinished(state);
     } else {
       if (state == null) {
         state = UpState('', fileKey, fileSize, 0, '', chunkSize: chunkSize);
@@ -190,6 +191,7 @@ class UpManager {
         if (state.chunks.length < 2) {
           // if single chunk
           await _processOneChunk(fileKey, state, fileData, fileKey);
+          upExecutor.onFinished(state);
         } else {
           await _processMultiChunk(fileKey, state, fileKey, fileData);
         }
