@@ -229,7 +229,6 @@ class UpManager {
       }
     }
     state = await upExecutor.completePart(fileKey, state);
-
     await _checkResult(state, filePath);
   }
 
@@ -266,6 +265,7 @@ class UpManager {
       chunkState.etag = etag;
       state.successCount += 1;
       upExecutor.updatePercentage(state.chunks.length, state.successCount);
+      await stateStorage.saveState(fileKey, state);
     } else {
       throw new UploadException();
     }
