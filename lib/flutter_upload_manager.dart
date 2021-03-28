@@ -108,6 +108,7 @@ class UpState {
 
   /// Constructor for instance from storage
   UpState.fromMap(Map map) {
+    this.chunks = <ChunkState>[];
     this.uploadId = map[UploadIdKey];
     this.filePath = map[FilepathKey];
     this.fileSize = map[FilesizeKey];

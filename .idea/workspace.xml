@@ -38,7 +38,7 @@
       <recent name="$PROJECT_DIR$/test" />
     </key>
   </component>
-  <component name="RunManager" selected="Flutter Test.single upload">
+  <component name="RunManager" selected="Flutter Test.Multiple upload">
     <configuration name="Broken upload" type="FlutterTestConfigType" factoryName="Flutter Test" temporary="true" nameIsGenerated="true">
       <option name="testName" value="Broken upload" />
       <option name="testFile" value="$PROJECT_DIR$/test/flutter_upload_manager_test.dart" />
@@ -61,10 +61,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Flutter Test.Multiple upload" />
         <item itemvalue="Flutter Test.single upload" />
         <item itemvalue="Flutter Test.new state" />
         <item itemvalue="Flutter Test.Broken upload" />
-        <item itemvalue="Flutter Test.Multiple upload" />
       </list>
     </recent_temporary>
   </component>
