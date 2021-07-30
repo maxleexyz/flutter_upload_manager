@@ -171,7 +171,7 @@ void main() {
   });
 
   test("Broken upload", () async {
-    final filePath = "/Users/alex/Documents/novel/jzj.txt";
+    final filePath = "/Users/alex/Documents/novel/mqsg.mobi";
     final file = new File(filePath);
     final fileLength = file.lengthSync();
     final fileContent = await file.readAsBytes();

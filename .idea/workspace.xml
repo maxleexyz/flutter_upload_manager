@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="ac078c1c-dc3f-4ce2-be16-fe7aa5d8506e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/flutter_upload_manager.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/flutter_upload_manager.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/flutter_upload_manager_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/test/flutter_upload_manager_test.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,7 +43,7 @@
       <recent name="$PROJECT_DIR$/test" />
     </key>
   </component>
-  <component name="RunManager" selected="Flutter Test.Multiple upload">
+  <component name="RunManager" selected="Flutter Test.Broken upload">
     <configuration name="Broken upload" type="FlutterTestConfigType" factoryName="Flutter Test" temporary="true" nameIsGenerated="true">
       <option name="testName" value="Broken upload" />
       <option name="testFile" value="$PROJECT_DIR$/test/flutter_upload_manager_test.dart" />
@@ -61,10 +66,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Flutter Test.Broken upload" />
         <item itemvalue="Flutter Test.Multiple upload" />
         <item itemvalue="Flutter Test.single upload" />
         <item itemvalue="Flutter Test.new state" />
-        <item itemvalue="Flutter Test.Broken upload" />
       </list>
     </recent_temporary>
   </component>

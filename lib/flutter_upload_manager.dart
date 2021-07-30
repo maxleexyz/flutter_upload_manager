@@ -187,20 +187,32 @@ class UpManager {
       upExecutor.onFinished(state);
     } else {
       if (state == null) {
-        state = UpState('', fileKey, fileSize, 0, '', chunkSize: chunkSize);
-        upExecutor.initUpload(state);
-        if (state.chunks.length < 2) {
-          // if single chunk
-          await _processOneChunk(fileKey, state, fileData, fileKey);
-          upExecutor.onFinished(state);
-        } else {
-          await _processMultiChunk(fileKey, state, fileKey, fileData);
-        }
+        state =
+            await doReailUpload(state, fileKey, fileSize, chunkSize, fileData);
       } else {
         // 端点续传
-        await _processBrokenState(fileKey, state, fileData, fileKey);
+        try {
+          await _processBrokenState(fileKey, state, fileData, fileKey);
+        } catch (ex) {
+          state = await doReailUpload(
+              state, fileKey, fileSize, chunkSize, fileData);
+        }
       }
     }
+  }
+
+  Future<UpState> doReailUpload(UpState state, String fileKey, int fileSize,
+      int chunkSize, Uint8List fileData) async {
+    state = UpState('', fileKey, fileSize, 0, '', chunkSize: chunkSize);
+    upExecutor.initUpload(state);
+    if (state.chunks.length < 2) {
+      // if single chunk
+      await _processOneChunk(fileKey, state, fileData, fileKey);
+      upExecutor.onFinished(state);
+    } else {
+      await _processMultiChunk(fileKey, state, fileKey, fileData);
+    }
+    return state;
   }
 
   Future _processBrokenState(String fileKey, UpState state, List<int> fileData,
