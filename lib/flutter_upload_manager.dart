@@ -19,19 +19,19 @@ class ChunkState {
   static const EtagKey = 'etag';
 
   /// chunkId
-  int id;
+  int? id;
 
   /// range start of file
-  int startIdx;
+  int? startIdx;
 
   /// range end of file
-  int endIdx;
+  int? endIdx;
 
   /// upload state 0=uploading 1=success 2
-  int state;
+  int? state;
 
   /// etag from upload result
-  String etag;
+  String? etag;
 
   /// save object as a dictionary
   Map asMap() => {
@@ -67,36 +67,36 @@ class UpState {
   static const UrlKey = 'url';
 
   /// unique id of
-  String uploadId;
+  String? uploadId;
 
   /// upload file path
-  String filePath;
+  String? filePath;
 
   /// file size used to caculate chunks
-  int fileSize;
+  int? fileSize;
 
   /// upload chunks
-  List<ChunkState> chunks;
+  List<ChunkState>? chunks;
 
   /// success chunks count
-  int successCount;
+  int successCount = -1;
 
   /// upload url
-  String url;
+  String? url;
 
   /// Constructor for new
   UpState(
       this.uploadId, this.filePath, this.fileSize, this.successCount, this.url,
-      {int chunkSize: DEFAULT_CHUNK_SIZE}) {
-    assert(this.fileSize <= chunkSize * 599);
+      {int chunkSize = DEFAULT_CHUNK_SIZE}) {
+    assert(this.fileSize! <= chunkSize * 599);
     this.chunks = <ChunkState>[];
     for (var i = 0; i < 600; i++) {
       final startIdx = i * chunkSize;
       var endIdx = (i + 1) * chunkSize;
-      if (endIdx > fileSize) {
-        endIdx = fileSize;
+      if (endIdx > fileSize!) {
+        endIdx = fileSize!;
       }
-      this.chunks.add(new ChunkState(i + 1, startIdx, endIdx, 0));
+      this.chunks?.add(new ChunkState(i + 1, startIdx, endIdx, 0));
       if (endIdx == fileSize) {
         // be sure reach the end of file, quit loop
         break;
@@ -104,7 +104,7 @@ class UpState {
     }
   }
 
-  get etags => this.chunks.map((chunkState) => chunkState.etag).toList();
+  get etags => this.chunks?.map((chunkState) => chunkState.etag).toList();
 
   /// Constructor for instance from storage
   UpState.fromMap(Map map) {
@@ -114,14 +114,14 @@ class UpState {
     this.fileSize = map[FilesizeKey];
     this.url = map[UrlKey];
     for (final ck in map[ChunksKey]) {
-      this.chunks.add(ChunkState.fromMap(ck));
+      this.chunks?.add(ChunkState.fromMap(ck));
     }
     this.successCount = map[SuccessCountKey];
   }
 
   Map toMap() {
     final chunks = <Map>[];
-    for (var chunkstate in this.chunks) {
+    for (var chunkstate in this.chunks!) {
       chunks.add(chunkstate.asMap());
     }
     return {
@@ -136,21 +136,21 @@ class UpState {
 
   @override
   String toString() =>
-      "$filePath($fileSize) chunks:${chunks.map((c) => c.toString()).join('\n')} successCount:$successCount";
+      "$filePath($fileSize) chunks:${chunks?.map((c) => c.toString()).join('\n')} successCount:$successCount";
 }
 
 /// Delegate for implement state storage
 abstract class StateDelegate {
   Future saveState(String filePath, UpState state);
-  UpState loadByPath(String filePath);
-  Future removeState(String filePath);
+  UpState? loadByPath(String filePath);
+  Future removeState(String? filePath);
 }
 
 /// Delegate for implement upload
 abstract class UploadDelegate {
   initUpload(UpState state);
-  Future<UpState> directUpload(
-      String fileKey, UpState state, List<int> fileData);
+  Future<UpState?> directUpload(
+      String fileKey, UpState? state, List<int> fileData);
   Future<UpState> initPartialUpload(String fileKey, UpState state);
   Future<String> uploadPart(
       String fileKey, UpState state, int idx, List<int> chunkData);
@@ -178,10 +178,10 @@ class UpManager {
   }
 
   Future upfile(String fileKey, Uint8List fileData, int fileSize,
-      {int chunkSize: 1024 * 1024, int p: 2}) async {
+      {int chunkSize = 1024 * 1024, int p = 2}) async {
     this.proccessCount = p;
-    UpState state = stateStorage.loadByPath(fileKey);
-    if (state != null && state.successCount == state.chunks.length) {
+    UpState? state = stateStorage.loadByPath(fileKey);
+    if (state != null && state.successCount == state.chunks?.length) {
       // if have a old state, check if need reupload
       await _processOldState(state);
       upExecutor.onFinished(state);
@@ -201,11 +201,11 @@ class UpManager {
     }
   }
 
-  Future<UpState> doReailUpload(UpState state, String fileKey, int fileSize,
+  Future<UpState> doReailUpload(UpState? state, String fileKey, int fileSize,
       int chunkSize, Uint8List fileData) async {
     state = UpState('', fileKey, fileSize, 0, '', chunkSize: chunkSize);
     upExecutor.initUpload(state);
-    if (state.chunks.length < 2) {
+    if (state.chunks!.length < 2) {
       // if single chunk
       await _processOneChunk(fileKey, state, fileData, fileKey);
       upExecutor.onFinished(state);
@@ -217,19 +217,19 @@ class UpManager {
 
   Future _processBrokenState(String fileKey, UpState state, List<int> fileData,
       String filePath) async {
-    assert(state.uploadId.isNotEmpty);
+    assert(state.uploadId!.isNotEmpty);
     final ps = state.chunks
-        .map((i) => i)
-        .where((chunkState) => chunkState.state < 1)
-        .map((e) => _processUpPart(fileKey, state, e.id - 1, fileData));
-    await Future.wait(ps);
+        ?.map((i) => i)
+        .where((chunkState) => chunkState.state! < 1)
+        .map((e) => _processUpPart(fileKey, state, e.id! - 1, fileData));
+    await Future.wait(ps ?? []);
     await _checkResult(state, filePath);
   }
 
   Future _processMultiChunk(String fileKey, UpState state, String filePath,
       List<int> fileData) async {
     state = await upExecutor.initPartialUpload(fileKey, state);
-    final chunkIdxList = new List<int>.generate(state.chunks.length, (i) => i);
+    final chunkIdxList = new List<int>.generate(state.chunks!.length, (i) => i);
     // wait for each chunk uploaded
 
     if (this.proccessCount > 1) {
@@ -255,8 +255,8 @@ class UpManager {
   }
 
   Future _checkResult(UpState state, String filePath) async {
-    if (state.chunks.map((st) => st.state).reduce((v1, v2) => v1 + v2) !=
-        state.chunks.length) {
+    if (state.chunks?.map((st) => st.state).reduce((v1, v2) => v1! + v2!) !=
+        state.chunks?.length) {
       // if success count not equal to total means faild
       await stateStorage.saveState(filePath, state);
       upExecutor.onFinished(state);
@@ -268,28 +268,28 @@ class UpManager {
 
   Future _processUpPart(
       String fileKey, UpState state, int chunkIdx, List<int> fileData) async {
-    final chunkState = state.chunks[chunkIdx];
+    final chunkState = state.chunks![chunkIdx];
     List<int> chunkData =
-        fileData.sublist(chunkState.startIdx, chunkState.endIdx);
+        fileData.sublist(chunkState.startIdx!, chunkState.endIdx);
     final etag =
         await upExecutor.uploadPart(fileKey, state, chunkIdx + 1, chunkData);
     if (etag.isNotEmpty) {
       chunkState.state = 1;
       chunkState.etag = etag;
       state.successCount += 1;
-      upExecutor.updatePercentage(state.chunks.length, state.successCount);
+      upExecutor.updatePercentage(state.chunks!.length, state.successCount);
       await stateStorage.saveState(fileKey, state);
     } else {
       throw new UploadException();
     }
   }
 
-  Future _processOneChunk(String fileKey, UpState state, List<int> fileData,
+  Future _processOneChunk(String fileKey, UpState? state, List<int> fileData,
       String filePath) async {
     state = await upExecutor.directUpload(fileKey, state, fileData);
-    if (state.successCount > 0) {
+    if (state!.successCount > 0) {
       await stateStorage.removeState(filePath);
-      assert(state != null);
+
       upExecutor.onFinished(state);
     }
   }

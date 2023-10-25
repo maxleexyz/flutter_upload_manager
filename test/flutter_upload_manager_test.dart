@@ -9,26 +9,21 @@ import 'package:oss_flutter/oss_flutter.dart';
 
 class Storage implements StateDelegate {
   Storage();
-  UpState old;
+  UpState? old;
   Storage.fromOldState(UpState state) {
     old = state;
   }
   @override
-  UpState loadByPath(String filePath) {
-    // TODO: implement loadByPath
+  UpState? loadByPath(String filePath) {
     return old;
   }
 
   @override
-  Future removeState(String filePath) {
-    // TODO: implement removeState
-    print('do remove state:$filePath');
-  }
+  Future removeState(String? filePath) async {}
 
   @override
-  Future saveState(String filePath, UpState state) {
-    // TODO: implement saveState
-    print('do save state:$state');
+  Future saveState(String filePath, UpState state) async {
+    print("object");
   }
 }
 
@@ -38,10 +33,8 @@ class Uploader implements UploadDelegate {
 
   @override
   Future<UpState> completePart(String fileKey, UpState state) async {
-    // TODO: implement cpmletePart
-
     final cplReq = client.completePartUpload(
-        'codiario', fileKey, state.uploadId, state.etags);
+        'codiario', fileKey, state.uploadId ?? '', state.etags);
     final cplRequest = new console.Request(cplReq.method, cplReq.Url,
         headers:
             console.Headers((cplReq.headers ?? {}).cast<String, dynamic>()),
@@ -53,9 +46,8 @@ class Uploader implements UploadDelegate {
   }
 
   @override
-  Future<UpState> directUpload(
-      String fileKey, UpState state, List<int> fileData) async {
-    // TODO: implement directUpload
+  Future<UpState?> directUpload(
+      String fileKey, UpState? state, List<int> fileData) async {
     print("will upload: $state");
     print("data len:${fileData.length}");
 
@@ -67,20 +59,19 @@ class Uploader implements UploadDelegate {
     print("response status:${response.statusCode}");
 
     print('uploaded');
-    state.chunks[0].state = 1;
-    state.successCount += 1;
+    state?.chunks?[0].state = 1;
+    state?.successCount += 1;
     return state;
   }
 
   @override
   Future<UpState> initPartialUpload(String fileKey, UpState state) async {
-    // TODO: implement initPartialUpload
     final req = client.initMultipartUpload('codiario', fileKey);
     final request = new console.Request(req.method, req.url,
         headers: console.Headers((req.headers ?? {}).cast<String, dynamic>()),
         body: req.fileData);
     final console.Response response = await http.send(request);
-    final ossresp = OSSResponse(await response.readAsString());
+    final ossresp = OSSResponse(resp_txt: await response.readAsString());
     ossresp.raise_exception();
     final uploadId = ossresp.getKey('UploadId');
     state.uploadId = uploadId;
@@ -90,29 +81,30 @@ class Uploader implements UploadDelegate {
 
   @override
   initUpload(UpState state) {
-    // TODO: implement initUpload
     print('init upload:$state');
     return state;
   }
 
   @override
   onFinished(UpState state) {
-    // TODO: implement onFinished
     print("upload finished with state:$state");
   }
 
   @override
   updatePercentage(int success, int total) {
-    // TODO: implement updatePercentage
     print("$success/$total");
   }
 
   @override
   Future<String> uploadPart(
       String fileKey, UpState state, int idx, List<int> chunkData) async {
-    // TODO: implement uploadPart
-    final upReq =
-        client.uploadPart('codiario', fileKey, state.uploadId, idx, chunkData);
+    final upReq = client.uploadPart(
+      'codiario',
+      fileKey,
+      state.uploadId ?? '',
+      idx,
+      chunkData,
+    );
     final upRequest = new console.Request(upReq.method, upReq.Url,
         headers: console.Headers((upReq.headers ?? {}).cast<String, dynamic>()),
         body: upReq.fileData);
@@ -120,12 +112,10 @@ class Uploader implements UploadDelegate {
     final console.Response upResponse = await http.send(upRequest);
     final etag = upResponse.headers['ETag'];
     print("idx $idx uploaded ${chunkData.length} bytes");
-    return etag.first;
+    return etag?.first ?? '';
   }
 
-  @override
   Future<List<int>> encrypt(List<int> rawData) async {
-    // TODO: implement encrypt
     await Future.delayed(Duration(seconds: 1));
     return rawData;
   }
@@ -139,17 +129,17 @@ void main() {
         new UpState('', file.path, file.lengthSync(), 0, '', chunkSize: 7);
     var splitList = [];
     final fileContent = await file.readAsBytes();
-    for (var i = 0; i < state.chunks.length; i++) {
-      final chunkstate = state.chunks[i];
+    for (var i = 0; i < state.chunks!.length; i++) {
+      final chunkstate = state.chunks![i];
       splitList
-          .add(fileContent.sublist(chunkstate.startIdx, chunkstate.endIdx));
+          .add(fileContent.sublist(chunkstate.startIdx!, chunkstate.endIdx));
     }
-    var temp_list = <int>[];
+    var tempList = <int>[];
     for (var l in splitList) {
-      temp_list = temp_list + l;
+      tempList = tempList + l;
     }
-    print('${utf8.decode(temp_list)}');
-    expect(fileContent, temp_list);
+    print('${utf8.decode(tempList)}');
+    expect(fileContent, tempList);
   });
   test("single upload", () async {
     final stateStorage = new Storage();
@@ -180,13 +170,14 @@ void main() {
         new UpState("test_id", filePath, fileLength, 3, '', chunkSize: 501001);
     print(upState);
     final chunks = <List<int>>[];
-    var total_length = 0;
-    for (var chunkState in upState.chunks) {
-      final slice = fileContent.sublist(chunkState.startIdx, chunkState.endIdx);
-      total_length += slice.length;
+    var totalLength = 0;
+    for (var chunkState in upState.chunks!) {
+      final slice =
+          fileContent.sublist(chunkState.startIdx!, chunkState.endIdx);
+      totalLength += slice.length;
       chunks.add(slice);
     }
-    print('slice total=:$total_length');
-    expect(total_length, fileLength);
+    print('slice total=:$totalLength');
+    expect(totalLength, fileLength);
   });
 }
